@@ -35,7 +35,7 @@ Foundry fork test against **live Base bytecode** (pinned block 58461106), execut
 - **Method A** — standalone forge test (interfaces only, no target-repo compilation): `forge test --match-contract C1SessionRecycleForkTest -vv` → PASS. Logs: stake 2000e18; held onHold 250.18e18 (12.5%); released same-tx 1749.82e18 (87.5% ≥ 85.7% floor); session 2 opened same UTC day; session 2 stipend drawn 5.11e18; locked-after-both-sessions 0.
 - **Method B** — raw `cast` calldata against an anvil fork of Base: full chain of txs status 1 (register → open 584327s → warp → close → hold 271.49e18, inline refund ~1729.5e18 → session #2 opened same day_start 1795392000 → claimForProvider success).
 
-Repo (reproduce with `BASE_RPC_URL=https://mainnet.base.org forge test --match-contract C1SessionRecycleForkTest -vv`): attached / [gist to be pasted].
+Repo: https://github.com/Dexanode/morpheus-c1-daylock-poc (reproduce with `BASE_RPC_URL=https://mainnet.base.org forge test --match-contract C1SessionRecycleForkTest -vv`); zip attached as fallback.
 
 ## FIX
 Scope the day-lock to the **entire stipend-eligible period**, not only the final day: `userDuration_ = sessionEnd_ - session.openedAt` (lock the full used-stipend equivalent until the last drawn epoch's release), or track per-day consumption so each drawn day's stake-equivalent stays locked until its own epoch closes. `stipendToStake(userInitialLock_, startOfEndDay_)` at L305–315 anchors only to the final day — that is the single-line root cause.
